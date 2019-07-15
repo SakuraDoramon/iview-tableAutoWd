@@ -11,11 +11,11 @@ export default {
   data () {
     return {
       columns: [
+        { type: 'selection', key: 'selection', width: 60, align: 'center' },
         {
             title: 'Name',
             key: 'name',
             resizable: true,
-            fixed: 'left'
         },
         {
             title: 'Age',

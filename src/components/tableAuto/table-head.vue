@@ -207,7 +207,6 @@
               }
             },
             handleMouseMove (event, column) {
-              console.log(event, column, 'event, column')
               // 解决操作列不支持自适应列宽
               if (this.headRows[0].findIndex(n => n.key === column.key) === (this.headRows[0].length - 2)) return
               if (column.children && column.children.length > 0) return
