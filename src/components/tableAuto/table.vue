@@ -352,12 +352,15 @@ import { debuglog } from 'util';
                 // 前列之前的列宽属于额外宽度
                 let _extraWd = 0
                 this.cloneColumns.forEach((n, index) => {
-                  const columnEl = this.$el.querySelector(`th.${n.key}`)
-                  if (_index > -1 && index < _index) {
-                    _extraWd += columnEl.offsetWidth
+                  if (n.key) {
+                    const columnEl = this.$el.querySelector(`th.${n.key}`)
+                    if (_index > -1 && index < _index) {
+                      _extraWd += columnEl.offsetWidth
+                    }
                   }
                 })
                 this.cloneColumns.forEach(col => {
+                  if (col.key) {
                     const columnEl = this.$el.querySelector(`th.${col.key}`)
                     if (this.currentColumn.key === col.key) {
                       // 判断当前改变后列宽是否小于最小宽度，如果小于最小宽度，则宽度取最小宽度
@@ -369,7 +372,8 @@ import { debuglog } from 'util';
                     } else {
                       // col.width = columnEl.offsetWidth
                     }
-                });
+                  }
+                })
                 this.handleResize()
             },
             handleResize () {
@@ -865,6 +869,9 @@ import { debuglog } from 'util';
                     column._filterVisible = false;
                     column._isFiltered = false;
                     column._filterChecked = [];
+                    if (column.key !== 'action') {
+                      column.resizable = true
+                    }
 
                     if ('filterMultiple' in column) {
                         column._filterMultiple = column.filterMultiple;
