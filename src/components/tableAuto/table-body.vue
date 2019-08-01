@@ -6,8 +6,9 @@
         <tbody :class="[prefixCls + '-tbody']">
             <template v-for="(row, index) in data">
                 <table-tr
+                    :draggable="draggable"
                     :row="row"
-                    :key="row._rowKey"
+                    :key="rowKey ? row._rowKey : index"
                     :prefix-cls="prefixCls"
                     @mouseenter.native.stop="handleMouseIn(row._index)"
                     @mouseleave.native.stop="handleMouseOut(row._index)"
@@ -57,6 +58,14 @@
             columnsWidth: Object,
             fixed: {
                 type: [Boolean, String],
+                default: false
+            },
+            draggable: {
+                type: Boolean,
+                default: false
+            },
+            rowKey: {
+                type: Boolean,
                 default: false
             }
         },

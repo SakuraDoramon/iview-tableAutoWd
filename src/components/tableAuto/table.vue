@@ -18,10 +18,12 @@
                 v-show="!((!!localeNoDataText && (!data || data.length === 0)) || (!!localeNoFilteredDataText && (!rebuildData || rebuildData.length === 0)))">
                 <table-body
                     ref="tbody"
+                    :draggable="draggable"
                     :prefix-cls="prefixCls"
                     :styleObject="tableStyle"
                     :columns="cloneColumns"
                     :data="rebuildData"
+                    :row-key="rowKey"
                     :columns-width="columnsWidth"
                     :obj-data="objData"></table-body>
             </div>
@@ -55,10 +57,12 @@
                 <div :class="[prefixCls + '-fixed-body']" :style="fixedBodyStyle" ref="fixedBody" @mousewheel="handleFixedMousewheel" @DOMMouseScroll="handleFixedMousewheel">
                     <table-body
                         fixed="left"
+                        :draggable="draggable"
                         :prefix-cls="prefixCls"
                         :styleObject="fixedTableStyle"
                         :columns="leftFixedColumns"
                         :data="rebuildData"
+                        :row-key="rowKey"
                         :columns-width="columnsWidth"
                         :obj-data="objData"></table-body>
                 </div>
@@ -79,10 +83,12 @@
                 <div :class="[prefixCls + '-fixed-body']" :style="fixedBodyStyle" ref="fixedRightBody" @mousewheel="handleFixedMousewheel" @DOMMouseScroll="handleFixedMousewheel">
                     <table-body
                         fixed="right"
+                        :draggable="draggable"
                         :prefix-cls="prefixCls"
                         :styleObject="fixedRightTableStyle"
                         :columns="rightFixedColumns"
                         :data="rebuildData"
+                        :row-key="rowKey"
                         :columns-width="columnsWidth"
                         :obj-data="objData"></table-body>
                 </div>
@@ -116,6 +122,11 @@ import { debuglog } from 'util';
     export default {
         name: 'Table',
         components: { tableHead, tableBody },
+        provide () {
+            return {
+                tableRoot: this
+            };
+        },
         props: {
             data: {
                 type: Array,
@@ -175,6 +186,21 @@ import { debuglog } from 'util';
                 type: Boolean
             },
             loading: {
+                type: Boolean,
+                default: false
+            },
+            draggable: {
+                type: Boolean,
+                default: false
+            },
+            tooltipTheme: {
+                validator (value) {
+                    return oneOf(value, ['dark', 'light']);
+                },
+                default: 'dark'
+            },
+            // #5380 开启后，:key 强制更新，否则使用 index
+            rowKey: {
                 type: Boolean,
                 default: false
             }
@@ -345,8 +371,6 @@ import { debuglog } from 'util';
               this.currentLeft = resizeProxyLeft
             },
             handleResizeProxy () {
-                console.log('改变宽度', this.currentColumn)
-                console.log('事件', this.currentLeft)
                 // 当前改变列宽的是表格的第几列
                 let _index = this.cloneColumns.findIndex(n => this.currentColumn.key === n.key)
                 // 前列之前的列宽属于额外宽度
@@ -577,6 +601,8 @@ import { debuglog } from 'util';
                 const selection = this.getSelection();
                 if (status) {
                     this.$emit('on-select-all', selection);
+                } else {
+                    this.$emit('on-select-all-cancel', selection);
                 }
                 this.$emit('on-selection-change', selection);
             },
@@ -869,7 +895,7 @@ import { debuglog } from 'util';
                     column._filterVisible = false;
                     column._isFiltered = false;
                     column._filterChecked = [];
-                    if (column.key !== 'action') {
+                    if (column.key !== 'action' && index !== (columns.length -1)) {
                       column.resizable = true
                     }
 

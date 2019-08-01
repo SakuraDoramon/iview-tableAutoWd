@@ -1,29 +1,43 @@
 <template>
   <div :class="classes" ref="cell">
-    <template v-if="renderType === 'index'"><span>{{naturalIndex + 1}}</span></template>
+    <template v-if="renderType === 'index'"><span>{{ column.indexMethod ? column.indexMethod(row) : (naturalIndex + 1) }}</span></template>
     <template v-if="renderType === 'selection'">
-      <Checkbox :value="checked" @click.native.stop="handleClick" @on-change="toggleSelect" :disabled="disabled"></Checkbox>
+        <Checkbox :value="checked" @click.native.stop="handleClick" @on-change="toggleSelect" :disabled="disabled"></Checkbox>
     </template>
     <template v-if="renderType === 'html'"><span v-html="row[column.key]"></span></template>
-    <template v-if="renderType === 'normal'"><span>{{row[column.key]}}</span></template>
+    <template v-if="renderType === 'normal'">
+        <template v-if="column.tooltip">
+            <Tooltip transfer :content="row[column.key]" :theme="tableRoot.tooltipTheme" :disabled="!showTooltip" :max-width="300" class="ivu-table-cell-tooltip">
+                <span ref="content" @mouseenter="handleTooltipIn" @mouseleave="handleTooltipOut" class="ivu-table-cell-tooltip-content">{{ row[column.key] }}</span>
+            </Tooltip>
+        </template>
+        <span v-else>{{row[column.key]}}</span>
+    </template>
     <template v-if="renderType === 'expand' && !row._disableExpand">
       <div :class="expandCls" @click="toggleExpand">
         <Icon type="ios-arrow-right"></Icon>
       </div>
     </template>
-    <Cell
+    <table-expand
       v-if="renderType === 'render'"
       :row="row"
       :column="column"
       :index="index"
-      :render="column.render"></Cell>
+      :render="column.render"></table-expand>
+    <table-slot
+      v-if="renderType === 'slot'"
+      :row="row"
+      :column="column"
+      :index="index"></table-slot>
   </div>
 </template>
 <script>
-import Cell from './expand'
+import TableExpand from './expand';
+import TableSlot from './slot';
 export default {
   name: 'TableCell',
-  components: { Cell },
+  components: { TableExpand, TableSlot },
+  inject: ['tableRoot'],
   props: {
     prefixCls: String,
     row: Object,
@@ -42,7 +56,8 @@ export default {
     return {
       renderType: '',
       uid: -1,
-      context: this.$parent.$parent.$parent.currentContext
+      context: this.$parent.$parent.$parent.currentContext,
+      showTooltip: false,  // 鼠标滑过overflow文本时，再检查是否需要显示
     }
   },
   computed: {
@@ -52,7 +67,8 @@ export default {
         {
           [`${this.prefixCls}-hidden`]: !this.fixed && this.column.fixed && (this.column.fixed === 'left' || this.column.fixed === 'right'),
           [`${this.prefixCls}-cell-ellipsis`]: this.column.ellipsis || false,
-          [`${this.prefixCls}-cell-with-expand`]: this.renderType === 'expand'
+          [`${this.prefixCls}-cell-with-expand`]: this.renderType === 'expand',
+          [`${this.prefixCls}-cell-with-selection`]: this.renderType === 'selection'
         }
       ]
     },
@@ -74,6 +90,13 @@ export default {
     },
     handleClick () {
       // 放置 Checkbox 冒泡
+    },
+    handleTooltipIn () {
+      const $content = this.$refs.content;
+      this.showTooltip = $content.scrollWidth > $content.offsetWidth;
+    },
+    handleTooltipOut () {
+        this.showTooltip = false;
     }
   },
   created () {

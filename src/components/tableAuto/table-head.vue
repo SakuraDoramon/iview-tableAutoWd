@@ -134,7 +134,9 @@
             handleMouseDown (event, column) {
               if (this.$isServer) return
               // 解决操作列不支持自适应列宽
-              if (this.headRows[0].findIndex(n => n.key === column.key) === (this.headRows[0].length - 2)) return
+              if (this.headRows[0].findIndex(n => n.key === 'action') > -1) {
+                if (this.headRows[0].findIndex(n => n.key === column.key) === (this.headRows[0].length - 2)) return
+              }
               if (column.children && column.children.length > 0) return
 
               /* istanbul ignore if */
@@ -208,15 +210,15 @@
             },
             handleMouseMove (event, column) {
               // 解决操作列不支持自适应列宽
-              if (this.headRows[0].findIndex(n => n.key === column.key) === (this.headRows[0].length - 2)) return
+              if (this.headRows[0].findIndex(n => n.key === 'action') > -1) {
+                if (this.headRows[0].findIndex(n => n.key === column.key) === (this.headRows[0].length - 2)) return
+              }
               if (column.children && column.children.length > 0) return
               let target = event.target
               while (target && target.tagName !== 'TH') {
                 target = target.parentNode
               }
-
               if (!column || !column.resizable) return
-
               if (!this.dragging && this.border) {
                 let rect = target.getBoundingClientRect()
 
