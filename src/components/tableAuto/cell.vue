@@ -110,6 +110,8 @@ export default {
       this.renderType = 'expand'
     } else if (this.column.render) {
       this.renderType = 'render'
+    } else if (this.column.slot) {
+      this.renderType = 'slot'
     } else {
       this.renderType = 'normal'
     }
