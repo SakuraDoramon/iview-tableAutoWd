@@ -953,6 +953,9 @@ import { debuglog } from 'util';
                 const data = Csv(columns, datas, params, noHeader);
                 if (params.callback) params.callback(data);
                 else ExportCsv.download(params.filename, data);
+            },
+            dragAndDrop(a,b) {
+                this.$emit('on-drag-drop', a,b);
             }
         },
         created () {
